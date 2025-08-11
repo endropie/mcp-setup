@@ -1,0 +1,12 @@
+README
+.env
+.vscode
+.idea
+.DS_Store
+dist
+node_modules
+*.log
+coverage
+.yalc
+
+yalc.lock 
