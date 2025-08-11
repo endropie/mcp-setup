@@ -66,7 +66,7 @@ export async function createServer(
         start: 'node dist/index.js',
       },
       dependencies: {
-        '@endropie/mcp-setup': '^0.1',
+        'mcp-setup': '^0.1',
       },
       devDependencies: {
         '@types/node': '^20.11.24',
