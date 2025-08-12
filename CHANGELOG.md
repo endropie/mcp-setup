@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.5](https://github.com/endropie/mcp-setup/compare/mcp-setup-v0.0.4...mcp-setup-v0.0.5) (2025-08-12)
+
+
+### Bug Fixes
+
+* change branch release ([1764aeb](https://github.com/endropie/mcp-setup/commit/1764aeb8185f41e8bd1a970746ac3de8ff648c80))
+* new description readme ([67547ce](https://github.com/endropie/mcp-setup/commit/67547cee3854b4e92432bdedb631f3791eb7301d))
+
 ## [0.0.4](https://github.com/endropie/mcp-setup/compare/mcp-setup-v0.0.3...mcp-setup-v0.0.4) (2025-08-12)
 
 
