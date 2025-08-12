@@ -3,7 +3,7 @@ description:
 globs: 
 alwaysApply: false
 ---
-We are in the mcp-setup , a typescript framework that allows construction of model context protocol (mcp) servers.
+We are in the mcp-setup , a typescript module that allows construction of model context protocol (mcp) servers.
 We are implementing the new specification:
 <specification>Overview 
 MCP provides a standardized way for applications to:

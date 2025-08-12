@@ -1,8 +1,8 @@
-# MCP Framework
+# MCP Setup
 
-MCP-Framework is a framework for building Model Context Protocol (MCP) servers elegantly in TypeScript.
+MCP-Setup is a module for building Model Context Protocol (MCP) servers elegantly in TypeScript.
 
-MCP-Framework gives you architecture out of the box, with automatic directory-based discovery for tools, resources, and prompts. Use our powerful MCP abstractions to define tools, resources, or prompts in an elegant way. Our cli makes getting started with your own MCP server a breeze
+MCP-Setup gives you architecture out of the box, with automatic directory-based discovery for tools, resources, and prompts. Use our powerful MCP abstractions to define tools, resources, or prompts in an elegant way. Our cli makes getting started with your own MCP server a breeze
 
 ## Features
 
@@ -13,9 +13,9 @@ MCP-Framework gives you architecture out of the box, with automatic directory-ba
 - Easy-to-use base classes for tools, prompts, and resources
 - Out of the box authentication for SSE endpoints
 
-## Projects Built with MCP Framework
+## Projects Built with MCP Setup
 
-The following projects and services are built using MCP Framework:
+The following projects and services are built using MCP Setup:
 
 - ### [tip.md](https://tip.md)
 A crypto tipping service that enables AI assistants to help users send cryptocurrency tips to content creators directly from their chat interface. The MCP service allows for:
@@ -39,7 +39,7 @@ Setup instructions for various clients (Cursor, Sage, Claude Desktop) are availa
 ### Using the CLI (Recommended)
 
 ```bash
-# Install the framework globally
+# Install the module globally
 npm install -g mcp-setup
 
 # Create a new MCP server project
@@ -53,7 +53,7 @@ cd my-mcp-server
 
 ## CLI Usage
 
-The framework provides a powerful CLI for managing your MCP server projects:
+The setup provides a powerful CLI for managing your MCP server projects:
 
 ### Project Creation
 
@@ -80,7 +80,7 @@ mcp add tool price-fetcher
 
 ### Building and Validation
 
-The framework provides comprehensive validation to ensure your tools are properly documented and functional:
+The setup provides comprehensive validation to ensure your tools are properly documented and functional:
 
 ```bash
 # Build with automatic validation (recommended)
@@ -247,7 +247,7 @@ Add this configuration to your Claude Desktop config file:
 
 ## Environment Variables
 
-The framework supports the following environment variables for configuration:
+The setup supports the following environment variables for configuration:
 
 | Variable              | Description                                           | Default     |
 |-----------------------|-------------------------------------------------------|-------------|
@@ -272,7 +272,7 @@ MCP_DEBUG_CONSOLE=true node dist/index.js
 
 ### Defining Tools
 
-MCP Framework uses Zod schemas for defining tool inputs, providing type safety, validation, and automatic documentation:
+MCP Setup uses Zod schemas for defining tool inputs, providing type safety, validation, and automatic documentation:
 
 ```typescript
 import { MCPTool, McpInput } from "mcp-setup";
@@ -301,13 +301,13 @@ export default AddTool;
 - ✅ **Single source of truth** - Define types and validation in one place
 - ✅ **Automatic type inference** - TypeScript types are inferred from your schema
 - ✅ **Rich validation** - Leverage Zod's powerful validation features
-- ✅ **Required descriptions** - Framework enforces documentation
+- ✅ **Required descriptions** - Setup enforces documentation
 - ✅ **Better IDE support** - Full autocomplete and type checking
 - ✅ **Cleaner code** - No duplicate type definitions
 
 ### Advanced Zod Schema Features
 
-The framework supports all Zod features:
+The setup supports all Zod features:
 
 ```typescript
 import { MCPTool, McpInput } from "mcp-setup";
@@ -391,7 +391,7 @@ No more duplicate interfaces or generic type parameters needed!
 
 **All schema fields must have descriptions**. This ensures your tools are well-documented and provides better user experience in MCP clients.
 
-The framework validates descriptions at multiple levels:
+The setup validates descriptions at multiple levels:
 
 #### 1. Build-time Validation (Recommended)
 ```bash
@@ -565,7 +565,7 @@ const server = new MCPServer({
 
 ## Authentication
 
-MCP Framework provides optional authentication for SSE endpoints. You can choose between JWT and API Key authentication, or implement your own custom authentication provider.
+MCP Setup provides optional authentication for SSE endpoints. You can choose between JWT and API Key authentication, or implement your own custom authentication provider.
 
 ### JWT Authentication
 

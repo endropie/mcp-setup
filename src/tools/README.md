@@ -39,7 +39,7 @@ export default AddTool;
 
 ## Advanced Schema Features
 
-The framework supports all Zod features:
+The module supports all Zod features:
 
 ```typescript
 import { MCPTool, McpInput } from "mcp-setup";
@@ -160,7 +160,7 @@ MCPTool correctly maps the following Zod features to JSON Schema:
 
 **All schema fields must have descriptions** using `.describe()`. This ensures your tools are well-documented and provides better user experience in MCP clients.
 
-The framework validates descriptions at multiple levels:
+The module validates descriptions at multiple levels:
 
 ### Build-time Validation
 ```bash
