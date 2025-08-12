@@ -416,7 +416,7 @@ export class MCPServer {
       const frameworkPackageJson = require('../../package.json');
       const frameworkVersion = frameworkPackageJson.version || 'unknown';
       const sdkVersion = this.getSdkVersion();
-      logger.info(`Starting MCP server: (Framework: ${frameworkVersion}, SDK: ${sdkVersion})...`);
+      logger.info(`Starting MCP server: (Setup: ${frameworkVersion}, SDK: ${sdkVersion})...`);
 
       const tools = await this.toolLoader.loadTools();
       this.toolsMap = new Map(tools.map((tool: ToolProtocol) => [tool.name, tool]));

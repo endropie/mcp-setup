@@ -13,26 +13,6 @@ MCP-Setup gives you architecture out of the box, with automatic directory-based 
 - Easy-to-use base classes for tools, prompts, and resources
 - Out of the box authentication for SSE endpoints
 
-## Projects Built with MCP Setup
-
-The following projects and services are built using MCP Setup:
-
-- ### [tip.md](https://tip.md)
-A crypto tipping service that enables AI assistants to help users send cryptocurrency tips to content creators directly from their chat interface. The MCP service allows for:
- - Checking wallet types for users
- - Preparing cryptocurrency tips for users/agents to complete
-Setup instructions for various clients (Cursor, Sage, Claude Desktop) are available in their [MCP Server documentation](https://docs.tip.md/mcp-server/).
-
-## Support our work
-
-[![Tip in Crypto](https://tip.md/badge.svg)](https://tip.md/QuantGeekDev)
-
-
-# [Read the full docs here](https://mcp-setup.com)
-
-
-
-
 
 ## Creating a repository with mcp-setup
 

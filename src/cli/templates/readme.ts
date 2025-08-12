@@ -149,7 +149,7 @@ Add this configuration to your Claude Desktop config file:
 
 ## Learn More
 
-- [MCP Framework Github](https://github.com/QuantGeekDev/mcp-setup)
-- [MCP Framework Docs](https://mcp-setup.com)
+- [MCP Setup Github](https://github.com/endropie/mcp-setup)
+
 `;
 }

@@ -1,6 +1,6 @@
-# MCP Framework Tests
+# MCP Setup Tests
 
-This directory contains unit tests for the MCP Framework.
+This directory contains unit tests for the MCP Setup.
 
 ## Structure
 

@@ -1,6 +1,6 @@
-# MCP Framework Tools
+# MCP Setup Tools
 
-The MCP Framework's `MCPTool` class provides an elegant way to create tools with Zod schema validation and automatic type inference.
+The MCP Setup's `MCPTool` class provides an elegant way to create tools with Zod schema validation and automatic type inference.
 
 ## Defining Tools
 
@@ -34,7 +34,7 @@ export default AddTool;
 1. **Single Source of Truth**: Define your schema once and get both TypeScript types and JSON schema
 2. **Automatic Type Inference**: `McpInput<this>` automatically infers types from your schema
 3. **Rich Validation**: Leverage all Zod constraints and modifiers
-4. **Required Descriptions**: Framework enforces documentation for all fields
+4. **Required Descriptions**: Setup enforces documentation for all fields
 5. **Better IDE Support**: Full autocomplete and type checking
 
 ## Advanced Schema Features
