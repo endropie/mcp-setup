@@ -77,7 +77,6 @@ module.exports = ${toolName};
 
       // Check if files exist first
       const files = await fs.readdir(toolsDir);
-      console.log('Files in tools dir:', files);
       expect(files).toContain('RootTool.js');
 
       // Test our utility directly
@@ -85,20 +84,15 @@ module.exports = ${toolName};
         extensions: ['.js'],
         excludePatterns: ['BaseTool.js', '*.test.js', '*.spec.js'],
       });
-      console.log('Discovered files:', discoveredFiles);
 
       const hasFiles = await hasValidFiles(toolsDir, {
         extensions: ['.js'],
         excludePatterns: ['BaseTool.js', '*.test.js', '*.spec.js'],
       });
-      console.log('Has valid files:', hasFiles);
 
       const toolLoader = new ToolLoader(testBaseDir);
-      console.log('ToolLoader base path:', testBaseDir);
-      console.log('ToolLoader tools dir should be:', join(testBaseDir, 'tools'));
 
       const hasTools = await toolLoader.hasTools();
-      console.log('ToolLoader hasTools result:', hasTools);
       expect(hasTools).toBe(true);
     });
 

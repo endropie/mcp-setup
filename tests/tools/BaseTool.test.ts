@@ -391,14 +391,12 @@ describe('BaseTool', () => {
         type: 'boolean',
         description: 'Boolean field',
       });
-      expect(properties!.arrayField).toEqual({
-        type: 'array',
-        description: 'Array field',
-      });
-      expect(properties!.objectField).toEqual({
-        type: 'object',
-        description: 'Object field',
-      });
+      
+      expect(properties!.arrayField).toHaveProperty('type', 'array');
+      expect(properties!.arrayField).toHaveProperty('description', 'Array field');
+
+      expect(properties!.objectField).toHaveProperty('type', 'object');
+      expect(properties!.objectField).toHaveProperty('description', 'Object field');
     });
 
     it('should correctly handle optional types', () => {
@@ -422,6 +420,7 @@ describe('BaseTool', () => {
       ]);
       expect(required).not.toContain('optionalString');
       expect(required).not.toContain('optionalNumber');
+
     });
 
     it('should specifically verify number types are not strings', () => {
@@ -476,16 +475,14 @@ describe('BaseTool', () => {
 
       const { properties, required } = definition.inputSchema;
 
-      expect((properties!.age as any).type).toBe('number');
+      expect((properties!.age as any).type).toBe('integer');
       expect((properties!.price as any).type).toBe('number');
       expect((properties!.weight as any).type).toBe('number');
 
       expect(required).toContain('age');
       expect(required).toContain('price');
       expect(required).not.toContain('weight');
-
-      console.log('MCP Tool Definition for client debugging:');
-      console.log(JSON.stringify(definition, null, 2));
     });
+  
   });
 });

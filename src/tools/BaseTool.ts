@@ -354,27 +354,20 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
   private generateSchemaFromLegacyFormat(schema: ToolInputSchema<TInput>): {
     type: 'object';
     properties: Record<string, unknown>;
-    required?: string[];
+    required: string[];
   } {
     const properties: Record<string, unknown> = {};
     const required: string[] = [];
 
     Object.entries(schema).forEach(([key, fieldSchema]) => {
       // Determine the correct JSON schema type (unwrapping optional if necessary)
-      const jsonType = this.getJsonSchemaType(fieldSchema.type);
-      if (this.isZodObjectType(fieldSchema)) {
-        properties[key] = {
-          ...zodToJsonSchema(fieldSchema),
-        }
-      }
-      else if(this.isZodObjectType(fieldSchema.type)) {
-        properties[key] = {
-          type: jsonType,
-          description: fieldSchema.description,
-          ...zodToJsonSchema(fieldSchema.type),
-        };
+      if(this.isZodObjectType(fieldSchema.type)) {
+        const { jsonSchema, isOptional } = this.extractFieldInfo(fieldSchema.type);
+        properties[key] = { ...fieldSchema, ...jsonSchema };
+        if (!isOptional) fieldSchema.required = true;
       }
       else {
+        const jsonType = this.getJsonSchemaType(fieldSchema.type);
         properties[key] = {
           ...fieldSchema,
           type: jsonType,
@@ -387,25 +380,16 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
         required.push(key);
       }
       // If the field is not an optional, add it to the required array.
-      else if (fieldSchema.type instanceof z.ZodAny && !(fieldSchema.type instanceof z.ZodOptional)) {
+      else if (this.isZodObjectType(fieldSchema.type) && !(fieldSchema.type instanceof z.ZodOptional)) {
         required.push(key);
       }
     });
 
-    const inputSchema: {
-      type: 'object';
-      properties: Record<string, unknown>;
-      required?: string[];
-    } = {
+    return {
       type: 'object',
       properties,
+      required,
     };
-
-    if (required.length > 0) {
-      inputSchema.required = required;
-    }
-
-    return inputSchema;
   }
 
   protected abstract execute(
@@ -430,7 +414,15 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
   private async validateInput(args: Record<string, unknown>): Promise<TInput> {
     if (this.isZodObjectSchema(this.schema)) return this.schema.parse(args) as TInput;
 
-    return args as TInput;
+     const zodSchema = z.object(
+        Object.fromEntries(
+          Object.entries(this.schema as ToolInputSchema<TInput>).map(([key, schema]) => [
+            key,
+            schema.type,
+          ])
+        )
+      );
+      return zodSchema.parse(args) as TInput;
   }
 
   private getJsonSchemaType(val: z.ZodType<any> | string): string {

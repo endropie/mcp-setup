@@ -27,10 +27,9 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "npm run build",
     "dev:pub": "rm -rf dist && npm run build && yalc publish --push",
-    "test": "echo \"No test specified\" && exit 1",
-    "test:jest": "NODE_OPTIONS='--experimental-vm-modules' jest",
-    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
-    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage"
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:watch": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --coverage"
   },
   "peerDependencies": {
     "@modelcontextprotocol/sdk": "^1.11.0"
@@ -57,6 +56,7 @@
     "@types/node": "^20.17.28",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
+    "cross-env": "^10.0.0",
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.5",
