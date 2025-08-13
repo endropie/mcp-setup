@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.6](https://github.com/endropie/mcp-setup/compare/mcp-setup-v0.0.5...mcp-setup-v0.0.6) (2025-08-13)
+
+
+### Bug Fixes
+
+* cli mcp-server ([d71131b](https://github.com/endropie/mcp-setup/commit/d71131b8f48be47c4fc55be93952153cf7126df9))
+* test tool ([6503b65](https://github.com/endropie/mcp-setup/commit/6503b651ed2e0941104f244f1d429696c0f236b1))
+
 ## [0.0.5](https://github.com/endropie/mcp-setup/compare/mcp-setup-v0.0.4...mcp-setup-v0.0.5) (2025-08-12)
 
 
