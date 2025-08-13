@@ -182,7 +182,7 @@ const MySchema = defineSchema({
 
 ### Standalone Validation
 ```bash
-mcp validate  # Check all tools for proper descriptions
+mcp-server validate  # Check all tools for proper descriptions
 ```
 
 ### Runtime Validation

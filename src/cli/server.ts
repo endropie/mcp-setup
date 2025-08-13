@@ -9,7 +9,7 @@ import { validateCommand } from './commands/validate.js';
 
 const program = new Command();
 
-program.name('mcp').description('CLI for managing MCP server projects').version('0.2.2');
+program.name('mcp-server').description('CLI for managing MCP server projects').version('0.2.2');
 
 program.command('build').description('Build the MCP project').action(buildFramework);
 
@@ -26,6 +26,7 @@ program
   .option('--no-install', 'skip npm install and build steps')
   .option('--no-example', 'skip creating example tool')
   .action(createServer);
+
 
 program
   .command('add')

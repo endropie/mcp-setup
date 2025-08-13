@@ -66,7 +66,7 @@ export async function createServer(
         start: 'node dist/index.js',
       },
       dependencies: {
-        'mcp-setup': '^0.1',
+        'mcp-setup': 'latest',
       },
       devDependencies: {
         '@types/node': '^20.11.24',
@@ -259,7 +259,7 @@ Project ${projectName} created and built successfully!
 You can now:
 1. cd ${projectName}
 2. Add more tools using:
-   mcp add tool <n>
+   mcp-server add tool <n>
     `);
     } else {
       console.log(`
@@ -270,7 +270,7 @@ You can now:
 2. Run 'npm install' to install dependencies
 3. Run 'npm run build' to build the project
 4. Add more tools using:
-   mcp add tool <n>
+   mcp-server add tool <n>
     `);
     }
   } catch (error) {

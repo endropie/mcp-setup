@@ -32,12 +32,12 @@ The project comes with an example tool in \`src/tools/ExampleTool.ts\`. You can 
 
 \`\`\`bash
 # Add a new tool
-mcp add tool my-tool
+mcp-server add tool my-tool
 
 # Example tools you might create:
-mcp add tool data-processor
-mcp add tool api-client
-mcp add tool file-handler
+mcp-server add tool data-processor
+mcp-server add tool api-client
+mcp-server add tool file-handler
 \`\`\`
 
 ## Tool Development

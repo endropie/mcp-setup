@@ -16,7 +16,7 @@
     "dist"
   ],
   "bin": {
-    "mcp": "dist/cli/index.js",
+    "mcp-server": "dist/cli/server.js",
     "mcp-build": "dist/cli/framework/build-cli.js"
   },
   "scripts": {

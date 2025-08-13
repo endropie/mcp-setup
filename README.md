@@ -23,7 +23,7 @@ MCP-Setup gives you architecture out of the box, with automatic directory-based 
 npm install -g mcp-setup
 
 # Create a new MCP server project
-mcp create my-mcp-server
+mcp-server create my-mcp-server
 
 # Navigate to your project
 cd my-mcp-server
@@ -39,11 +39,11 @@ The setup provides a powerful CLI for managing your MCP server projects:
 
 ```bash
 # Create a new project
-mcp create <your project name here>
+mcp-server create <your project name here>
 
 # Create a new project with the new EXPERIMENTAL HTTP transport
 Heads up: This will set cors allowed origin to "*", modify it in the index if you wish
-mcp create <your project name here> --http --port 1337 --cors
+mcp-server create <your project name here> --http --port 1337 --cors
 ```
 
 # Options:
@@ -55,7 +55,7 @@ mcp create <your project name here> --http --port 1337 --cors
 
 ```bash
 # Add a new tool
-mcp add tool price-fetcher
+mcp-server add tool price-fetcher
 ```
 
 ### Building and Validation
@@ -75,13 +75,13 @@ MCP_SKIP_TOOL_VALIDATION=true npm run build   # Skip validation (not recommended
 
 ```bash
 # Validate all tools have proper descriptions (for Zod schemas)
-mcp validate
+mcp-server validate
 ```
 
 This command checks that all tools using Zod schemas have descriptions for every field. The validation runs automatically during build, but you can also run it standalone:
 
 - ✅ **During build**: `npm run build` automatically validates tools
-- ✅ **Standalone**: `mcp validate` for manual validation
+- ✅ **Standalone**: `mcp-server validate` for manual validation
 - ✅ **Development**: Use `defineSchema()` helper for immediate feedback
 - ✅ **Runtime**: Server validates tools on startup
 
@@ -98,8 +98,8 @@ Use .describe() on each field, e.g., z.string().describe("Field description")
 {
   "scripts": {
     "build": "tsc && mcp-build",
-    "test": "jest && mcp validate",
-    "prepack": "npm run build && mcp validate"
+    "test": "jest && mcp-server validate",
+    "prepack": "npm run build && mcp-server validate"
   }
 }
 ```
@@ -108,29 +108,29 @@ Use .describe() on each field, e.g., z.string().describe("Field description")
 
 ```bash
 # Add a new prompt
-mcp add prompt price-analysis
+mcp-server add prompt price-analysis
 ```
 
 ### Adding a Resource
 
 ```bash
 # Add a new prompt
-mcp add resource market-data
+mcp-server add resource market-data
 ```
 
 ## Development Workflow
 
 1. **Create your project:**
    ```bash
-   mcp create my-mcp-server
+   mcp-server create my-mcp-server
    cd my-mcp-server
    ```
 
 2. **Add tools:**
    ```bash
-   mcp add tool data-fetcher
-   mcp add tool data-processor
-   mcp add tool report-generator
+   mcp-server add tool data-fetcher
+   mcp-server add tool data-processor
+   mcp-server add tool report-generator
    ```
 
 3. **Define your tool schemas with automatic validation:**
@@ -165,7 +165,7 @@ mcp add resource market-data
 
 5. **Optional: Run standalone validation:**
    ```bash
-   mcp validate  # Check all tools independently
+   mcp-server validate  # Check all tools independently
    ```
 
 6. **Test your server:**
@@ -196,8 +196,8 @@ Add this configuration to your Claude Desktop config file:
 "${projectName}": {
       "command": "node",
       "args":["/absolute/path/to/${projectName}/dist/index.js"]
-}
-}
+    }
+  }
 }
 ```
 
@@ -214,8 +214,8 @@ Add this configuration to your Claude Desktop config file:
 "${projectName}": {
       "command": "npx",
       "args": ["${projectName}"]
-}
-}
+    }
+  }
 }
 ```
 
@@ -393,7 +393,7 @@ const MySchema = defineSchema({
 
 #### 3. Standalone Validation
 ```bash
-mcp validate  # Check all tools for proper descriptions
+mcp-server validate  # Check all tools for proper descriptions
 ```
 
 #### 4. Runtime Validation
