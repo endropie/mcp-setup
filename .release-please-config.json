@@ -4,6 +4,7 @@
       "release-type": "node",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
+      "monorepo-tags": false,
       "changelog-path": "CHANGELOG.md",
       "pull-request-title-pattern": "chore: release ${version}"
     }
