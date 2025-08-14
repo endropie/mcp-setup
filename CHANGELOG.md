@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.8](https://github.com/endropie/mcp-setup/compare/v0.0.7...v0.0.8) (2025-08-14)
+
+
+### Bug Fixes
+
+* manifest include componet in tag ([4ef415d](https://github.com/endropie/mcp-setup/commit/4ef415d4693d1bb969e6dec559dde41d08fe3d6c))
+
 ## [0.0.7](https://github.com/endropie/mcp-setup/compare/mcp-setup-v0.0.6...mcp-setup-v0.0.7) (2025-08-14)
 
 
