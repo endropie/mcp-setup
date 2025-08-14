@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { SafeParseReturnType, z } from 'zod';
 import { Tool as SDKTool } from '@modelcontextprotocol/sdk/types.js';
 import { ImageContent } from '../transports/utils/image-handler.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
@@ -54,6 +54,7 @@ export type ToolContent = TextContent | ErrorContent | ImageContent;
 
 export type ToolResponse = {
   content: ToolContent[];
+  isError?: boolean; 
 };
 
 export interface ToolProtocol extends SDKTool {
@@ -401,9 +402,16 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
   }): Promise<ToolResponse> {
     try {
       const args = request.params.arguments || {};
-      const validatedInput = await this.validateInput(args);
+      const inputValidated = await this.validateInput(args);
+
+      if (!inputValidated.success) {
+        return this.createErrorResponse(
+          new Error(`Input validation failed: ${inputValidated.error.errors.map((err) => `${err.path.join('.')} - ${err.message}`).join(', ')}`)
+        );
+      }
+
       const result = await this.execute(
-        validatedInput as TSchema extends z.ZodObject<any> ? z.infer<TSchema> : TInput
+        inputValidated.data as TSchema extends z.ZodObject<any> ? z.infer<TSchema> : TInput
       );
       return this.createSuccessResponse(result);
     } catch (error) {
@@ -411,18 +419,27 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
     }
   }
 
-  private async validateInput(args: Record<string, unknown>): Promise<TInput> {
-    if (this.isZodObjectSchema(this.schema)) return this.schema.parse(args) as TInput;
+  private async validateInput(args: Record<string, unknown>): Promise<SafeParseReturnType<TInput, unknown>> {
+    
+    const zodSchema = this.isZodObjectSchema(this.schema) ? this.schema : z.object(
+      Object.fromEntries(
+        Object.entries(this.schema as ToolInputSchema<TInput>).map(([key, schema]) => {
+          if (this.isZodObjectType(schema.type)) return [key, schema.type];
+          else {
 
-     const zodSchema = z.object(
-        Object.fromEntries(
-          Object.entries(this.schema as ToolInputSchema<TInput>).map(([key, schema]) => [
-            key,
-            schema.type,
-          ])
-        )
-      );
-      return zodSchema.parse(args) as TInput;
+            let schemaZod = eval(jsonSchemaToZod(schema)) as unknown as z.ZodType<any>;
+            if (!(schema.required === true)) {
+              schemaZod = schemaZod.optional();
+            }
+            return [key, schemaZod]
+          }
+        })
+      )
+    );
+      
+    const result = zodSchema.safeParse(args);
+
+    return result as SafeParseReturnType<TInput, unknown>;
   }
 
   private getJsonSchemaType(val: z.ZodType<any> | string): string {
@@ -469,7 +486,8 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
 
   protected createErrorResponse(error: Error): ToolResponse {
     return {
-      content: [{ type: 'error', text: error.message }],
+      content: [{ type: 'text', text: error.message }],
+      isError: true,
     };
   }
 
