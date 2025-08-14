@@ -64,14 +64,24 @@ export default ExampleTool;
 ```ts
 import { MCPServer } from "mcp-setup";
 
-const server = new MCPServer({transport:{
-  type:"http",
-  options:{
-    port:1337,
-    cors: {
-      allowOrigin:"*"
-    }
-  }
+const server = new MCPServer({
+  transport:{
+    http: {
+      options:{
+        port:1337,
+        cors: {
+          allowOrigin:"*"
+        }
+      }
+    },
+    sse: {
+      options:{
+        port:1433,
+        cors: {
+          allowOrigin:"*"
+        }
+      }
+    },
 }});
 
 server.start();

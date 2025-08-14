@@ -418,9 +418,16 @@ const server = new MCPServer();
 // OR (mutually exclusive!) with SSE transport
 const server = new MCPServer({
   transport: {
-    type: "sse",
-    options: {
-      port: 8080            // Optional (default: 8080)
+    
+    http: {
+      options: {
+        port: 8000            // Optional (default: 8000)
+      }
+    }
+    sse: {
+      options: {
+        port: 8433            // Optional (default: 8433)
+      }
     }
   }
 });
@@ -439,7 +446,13 @@ The stdio transport is used by default if no transport configuration is provided
 const server = new MCPServer();
 // or explicitly:
 const server = new MCPServer({
-  transport: { type: "stdio" }
+  transport: {
+    stdio: {
+      options: {
+        // setup for stdio
+      }
+    } 
+  }
 });
 ```
 
@@ -450,18 +463,19 @@ To use Server-Sent Events (SSE) transport:
 ```typescript
 const server = new MCPServer({
   transport: {
-    type: "sse",
-    options: {
-      port: 8080,            // Optional (default: 8080)
-      endpoint: "/sse",      // Optional (default: "/sse")
-      messageEndpoint: "/messages", // Optional (default: "/messages")
-      cors: {
-        allowOrigin: "*",    // Optional (default: "*")
-        allowMethods: "GET, POST, OPTIONS", // Optional (default: "GET, POST, OPTIONS")
-        allowHeaders: "Content-Type, Authorization, x-api-key", // Optional (default: "Content-Type, Authorization, x-api-key")
-        exposeHeaders: "Content-Type, Authorization, x-api-key", // Optional (default: "Content-Type, Authorization, x-api-key")
-        maxAge: "86400"      // Optional (default: "86400")
-      }
+    sse: {
+      options: {
+        port: 8080,            // Optional (default: 8080)
+        endpoint: "/sse",      // Optional (default: "/sse")
+        messageEndpoint: "/messages", // Optional (default: "/messages")
+        cors: {
+          allowOrigin: "*",    // Optional (default: "*")
+          allowMethods: "GET, POST, OPTIONS", // Optional (default: "GET, POST, OPTIONS")
+          allowHeaders: "Content-Type, Authorization, x-api-key", // Optional (default: "Content-Type, Authorization, x-api-key")
+          exposeHeaders: "Content-Type, Authorization, x-api-key", // Optional (default: "Content-Type, Authorization, x-api-key")
+          maxAge: "86400"      // Optional (default: "86400")
+        }
+      },
     }
   }
 });
@@ -474,31 +488,32 @@ To use HTTP Stream transport:
 ```typescript
 const server = new MCPServer({
   transport: {
-    type: "http",
-    options: {
-      port: 8080,                // Optional (default: 8080)
-      endpoint: "/mcp",          // Optional (default: "/mcp") 
-      responseMode: "batch",     // Optional (default: "batch"), can be "batch" or "stream"
-      batchTimeout: 30000,       // Optional (default: 30000ms) - timeout for batch responses
-      maxMessageSize: "4mb",     // Optional (default: "4mb") - maximum message size
-      
-      // Session configuration
-      session: {
-        enabled: true,           // Optional (default: true)
-        headerName: "Mcp-Session-Id", // Optional (default: "Mcp-Session-Id")
-        allowClientTermination: true, // Optional (default: true)
+    http: {
+      options: {
+        port: 8080,                // Optional (default: 8080)
+        endpoint: "/mcp",          // Optional (default: "/mcp") 
+        responseMode: "batch",     // Optional (default: "batch"), can be "batch" or "stream"
+        batchTimeout: 30000,       // Optional (default: 30000ms) - timeout for batch responses
+        maxMessageSize: "4mb",     // Optional (default: "4mb") - maximum message size
+        
+        // Session configuration
+        session: {
+          enabled: true,           // Optional (default: true)
+          headerName: "Mcp-Session-Id", // Optional (default: "Mcp-Session-Id")
+          allowClientTermination: true, // Optional (default: true)
+        },
+        
+        // Stream resumability (for missed messages)
+        resumability: {
+          enabled: false,          // Optional (default: false)
+          historyDuration: 300000, // Optional (default: 300000ms = 5min) - how long to keep message history
+        },
+        
+        // CORS configuration
+        cors: {
+          allowOrigin: "*"         // Other CORS options use defaults
+        }
       },
-      
-      // Stream resumability (for missed messages)
-      resumability: {
-        enabled: false,          // Optional (default: false)
-        historyDuration: 300000, // Optional (default: 300000ms = 5min) - how long to keep message history
-      },
-      
-      // CORS configuration
-      cors: {
-        allowOrigin: "*"         // Other CORS options use defaults
-      }
     }
   }
 });
@@ -518,9 +533,10 @@ You can configure the response mode based on your specific needs:
 // For batch mode (default):
 const server = new MCPServer({
   transport: {
-    type: "http",
-    options: {
-      responseMode: "batch"
+    http: {
+      options: {
+        responseMode: "batch"
+      }
     }
   }
 });
@@ -528,9 +544,10 @@ const server = new MCPServer({
 // For stream mode:
 const server = new MCPServer({
   transport: {
-    type: "http",
-    options: {
-      responseMode: "stream"
+    http: {
+      options: {
+        responseMode: "stream"
+      }
     }
   }
 });
@@ -555,20 +572,21 @@ import { Algorithm } from "jsonwebtoken";
 
 const server = new MCPServer({
   transport: {
-    type: "sse",
-    options: {
-      auth: {
-        provider: new JWTAuthProvider({
-          secret: process.env.JWT_SECRET,
-          algorithms: ["HS256" as Algorithm], // Optional (default: ["HS256"])
-          headerName: "Authorization"         // Optional (default: "Authorization")
-        }),
-        endpoints: {
-          sse: true,      // Protect SSE endpoint (default: false)
-          messages: true  // Protect message endpoint (default: true)
+    sse: {
+      options: {
+        auth: {
+          provider: new JWTAuthProvider({
+            secret: process.env.JWT_SECRET,
+            algorithms: ["HS256" as Algorithm], // Optional (default: ["HS256"])
+            headerName: "Authorization"         // Optional (default: "Authorization")
+          }),
+          endpoints: {
+            sse: true,      // Protect SSE endpoint (default: false)
+            messages: true  // Protect message endpoint (default: true)
+          }
         }
       }
-    }
+    },
   }
 });
 ```
@@ -585,15 +603,16 @@ import { MCPServer, APIKeyAuthProvider } from "mcp-setup";
 
 const server = new MCPServer({
   transport: {
-    type: "sse",
-    options: {
-      auth: {
-        provider: new APIKeyAuthProvider({
-          keys: [process.env.API_KEY],
-          headerName: "X-API-Key" // Optional (default: "X-API-Key")
-        })
+    sse: {
+      options: {
+        auth: {
+          provider: new APIKeyAuthProvider({
+            keys: [process.env.API_KEY],
+            headerName: "X-API-Key" // Optional (default: "X-API-Key")
+          })
+        }
       }
-    }
+    },
   }
 });
 ```
