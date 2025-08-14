@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.9](https://github.com/endropie/mcp-setup/compare/v0.0.8...v0.0.9) (2025-08-14)
+
+
+### Bug Fixes
+
+* readme transport setting. ([938e608](https://github.com/endropie/mcp-setup/commit/938e608231c78b94587311c1ebf1316010d59231))
+
 ## [0.0.8](https://github.com/endropie/mcp-setup/compare/v0.0.7...v0.0.8) (2025-08-14)
 
 
