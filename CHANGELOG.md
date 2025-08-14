@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.7](https://github.com/endropie/mcp-setup/compare/mcp-setup-v0.0.6...mcp-setup-v0.0.7) (2025-08-14)
+
+
+### Features
+
+* publish workflow ([c8775a3](https://github.com/endropie/mcp-setup/commit/c8775a337649b150daab1780ba7662f8de4a4be6))
+
 ## [0.0.6](https://github.com/endropie/mcp-setup/compare/mcp-setup-v0.0.5...mcp-setup-v0.0.6) (2025-08-13)
 
 

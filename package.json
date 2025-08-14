@@ -1,6 +1,6 @@
 {
   "name": "mcp-setup",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "The Module for Setup MCP servers with Typescript language",
   "type": "module",
   "author": "Hendro wibowo<hendrowibowo@msn.com>",
