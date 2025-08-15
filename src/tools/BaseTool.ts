@@ -123,7 +123,6 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
    * @internal
    */
   get inputSchema(): ToolProtocol['toolDefinition']['inputSchema'] {
-    console.debug(`IS ZOD SCHEMA [${this.name}]: `, this.isZodObject(this.schema));
     if (this.isZodObject(this.schema)) {
       return this.generateSchemaFromZodObject(this.schema);
     } else {
@@ -171,8 +170,6 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
           `Use .describe() on each field, e.g., z.string().describe("Field description")`
       );
     }
-
-    console.debug(`Generated input schema for ${this.name}:`, newSchema);
 
     return newSchema;
   }
@@ -289,6 +286,12 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
           content: validContent,
         };
       }
+    }
+
+    if (this.isValidContent(data)) {
+      return {
+        content: [data],
+      };
     }
 
     return {
