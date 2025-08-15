@@ -1,28 +1,25 @@
-import { SafeParseReturnType, z } from 'zod';
+import { SafeParseReturnType, Schema, z } from 'zod';
 import { Tool as SDKTool } from '@modelcontextprotocol/sdk/types.js';
 import { ImageContent } from '../transports/utils/image-handler.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
 
-// Type to check if a Zod type has a description
-type HasDescription<T> = T extends { _def: { description: string } } ? T : never;
-
-// Type to ensure all properties in a Zod object have descriptions
-type AllFieldsHaveDescriptions<T extends z.ZodRawShape> = {
-  [K in keyof T]: HasDescription<T[K]>;
+export type InputSchemaProperties = {
+  [K in string]: {
+    [key: string]: any
+    type: 'string';
+    description: string;
+  }
 };
 
-// Strict Zod object type that requires all fields to have descriptions
-type StrictZodObject<T extends z.ZodRawShape> = z.ZodObject<AllFieldsHaveDescriptions<T>>;
-
-export type ToolInputSchema<T> = {
+export type ToolSchema<T> = {
   [K in keyof T]: {
     type: z.ZodType<T[K]>;
     description: string;
   };
 };
 
-export type ToolInput<T extends ToolInputSchema<any>> = {
+export type ToolInput<T extends ToolSchema<any>> = {
   [K in keyof T]: z.infer<T[K]['type']>;
 };
 
@@ -30,7 +27,7 @@ export type ToolInput<T extends ToolInputSchema<any>> = {
 export type InferSchemaType<TSchema> =
   TSchema extends z.ZodObject<any>
     ? z.infer<TSchema>
-    : TSchema extends ToolInputSchema<infer T>
+    : TSchema extends ToolSchema<infer T>
       ? T
       : never;
 
@@ -65,7 +62,7 @@ export interface ToolProtocol extends SDKTool {
     description: string;
     inputSchema: {
       type: 'object';
-      properties?: Record<string, unknown>;
+      properties?: InputSchemaProperties;
       required?: string[];
     };
   };
@@ -102,9 +99,9 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
   abstract description: string;
   protected abstract schema: TSchema extends z.ZodObject<any>
     ? TSchema
-    : TSchema extends ToolInputSchema<any>
+    : TSchema extends ToolSchema<any>
       ? TSchema
-      : z.ZodObject<any> | ToolInputSchema<TInput>;
+      : z.ZodObject<any> | ToolSchema<TInput>;
   protected useStringify: boolean = true;
   [key: string]: unknown;
 
@@ -113,7 +110,7 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
    * @returns {{name: string, description: string, inputSchema: {type: string, properties?: Record<string, unknown>, required?: string[]}}}
    * @internal
    */
-  get toolDefinition() {
+  get toolDefinition(): ToolProtocol['toolDefinition'] {
     return {
       name: this.name,
       description: this.description,
@@ -125,11 +122,12 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
    * Generates the MCP-compliant input schema from the tool schema.
    * @internal
    */
-  get inputSchema(): { type: 'object'; properties?: Record<string, unknown>; required?: string[] } {
-    if (this.isZodObjectSchema(this.schema)) {
+  get inputSchema(): ToolProtocol['toolDefinition']['inputSchema'] {
+    console.debug(`IS ZOD SCHEMA [${this.name}]: `, this.isZodObject(this.schema));
+    if (this.isZodObject(this.schema)) {
       return this.generateSchemaFromZodObject(this.schema);
     } else {
-      return this.generateSchemaFromLegacyFormat(this.schema as ToolInputSchema<TInput>);
+      return this.generateSchemaFromLegacyFormat(this.schema as ToolSchema<TInput>);
     }
   }
 
@@ -138,43 +136,33 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
    * with an MCP server, but can also be called manually for testing.
    */
   public validate(): void {
-    if (this.isZodObjectSchema(this.schema)) {
+    if (this.isZodObject(this.schema)) {
       // Access inputSchema to trigger validation
       const _ = this.inputSchema;
     }
   }
 
-  private isZodObjectSchema(schema: unknown): schema is z.ZodObject<any> {
-    return schema instanceof z.ZodObject;
+  private isZodObject(schema: unknown): schema is z.ZodObject<any> {    
+    return schema instanceof z.ZodObject 
+    || (
+      schema !== null &&
+      typeof schema === 'object' &&
+      typeof (schema as any).parse === "function" && 
+      (schema as any)._def?.typeName === 'ZodObject'
+    );
   }
 
-  private isZodObjectType(type: unknown): boolean {
+  private isZodType(type: unknown): boolean {
     return typeof type === "object" && type !== null && typeof (type as any).parse === "function";
   }
 
-  private generateSchemaFromZodObject(zodSchema: z.ZodObject<any>): {
-    type: 'object';
-    properties: Record<string, unknown>;
-    required: string[];
-  } {
-    const shape = zodSchema.shape;
-    const properties: Record<string, any> = {};
-    const required: string[] = [];
-    const missingDescriptions: string[] = [];
-
-    Object.entries(shape).forEach(([key, fieldSchema]) => {
-      const fieldInfo = this.extractFieldInfo(fieldSchema as z.ZodType);
-
-      if (!fieldInfo.jsonSchema.description) {
-        missingDescriptions.push(key);
-      }
-
-      properties[key] = fieldInfo.jsonSchema;
-
-      if (!fieldInfo.isOptional) {
-        required.push(key);
-      }
-    });
+  private generateSchemaFromZodObject(zodSchema: z.ZodObject<any>): ToolProtocol['toolDefinition']['inputSchema'] {
+    const newSchema = zodToJsonSchema(zodSchema) as ToolProtocol['toolDefinition']['inputSchema'];
+    
+    // Check for missing descriptions
+    const missingDescriptions = Object.entries(newSchema.properties || {})
+      .filter(([key, value]) => value.description === undefined)
+      .map(([key]) => key);
 
     if (missingDescriptions.length > 0) {
       throw new Error(
@@ -184,189 +172,23 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
       );
     }
 
-    return {
-      type: 'object',
-      properties,
-      required,
-    };
+    console.debug(`Generated input schema for ${this.name}:`, newSchema);
+
+    return newSchema;
   }
 
-  private extractFieldInfo(schema: z.ZodType): {
-    jsonSchema: any;
-    isOptional: boolean;
-  } {
-    let currentSchema = schema;
-    let isOptional = false;
-    let defaultValue: any;
-    let description: string | undefined;
-
-    // Extract description before unwrapping
-    const getDescription = (s: any) => s._def?.description;
-    description = getDescription(currentSchema);
-
-    // Unwrap modifiers to get to the base type
-    while (true) {
-      if (currentSchema instanceof z.ZodOptional) {
-        isOptional = true;
-        currentSchema = currentSchema.unwrap();
-        if (!description) description = getDescription(currentSchema);
-      } else if (currentSchema instanceof z.ZodDefault) {
-        defaultValue = currentSchema._def.defaultValue();
-        currentSchema = currentSchema._def.innerType;
-        if (!description) description = getDescription(currentSchema);
-      } else if (currentSchema instanceof z.ZodNullable) {
-        isOptional = true;
-        currentSchema = currentSchema.unwrap();
-        if (!description) description = getDescription(currentSchema);
-      } else {
-        break;
-      }
-    }
-
-    // Build JSON Schema
-    const jsonSchema: any = {
-      type: this.getJsonSchemaTypeFromZod(currentSchema),
-    };
-
-    if (description) {
-      jsonSchema.description = description;
-    }
-
-    if (defaultValue !== undefined) {
-      jsonSchema.default = defaultValue;
-    }
-
-    // Handle enums
-    if (currentSchema instanceof z.ZodEnum) {
-      jsonSchema.enum = currentSchema._def.values;
-    }
-
-    // Handle arrays
-    if (currentSchema instanceof z.ZodArray) {
-      const itemInfo = this.extractFieldInfo(currentSchema._def.type);
-      jsonSchema.items = itemInfo.jsonSchema;
-    }
-
-    // Handle nested objects
-    if (currentSchema instanceof z.ZodObject) {
-      const shape = currentSchema.shape;
-      const nestedProperties: Record<string, any> = {};
-      const nestedRequired: string[] = [];
-
-      Object.entries(shape).forEach(([key, fieldSchema]) => {
-        const nestedFieldInfo = this.extractFieldInfo(fieldSchema as z.ZodType);
-        nestedProperties[key] = nestedFieldInfo.jsonSchema;
-
-        if (!nestedFieldInfo.isOptional) {
-          nestedRequired.push(key);
-        }
-      });
-
-      jsonSchema.properties = nestedProperties;
-      if (nestedRequired.length > 0) {
-        jsonSchema.required = nestedRequired;
-      }
-    }
-
-    // Handle numeric constraints
-    if (currentSchema instanceof z.ZodNumber) {
-      const checks = (currentSchema as any)._def.checks || [];
-      checks.forEach((check: any) => {
-        switch (check.kind) {
-          case 'min':
-            jsonSchema.minimum = check.value;
-            if (check.inclusive === false) {
-              jsonSchema.exclusiveMinimum = true;
-            }
-            break;
-          case 'max':
-            jsonSchema.maximum = check.value;
-            if (check.inclusive === false) {
-              jsonSchema.exclusiveMaximum = true;
-            }
-            break;
-          case 'int':
-            jsonSchema.type = 'integer';
-            break;
-        }
-      });
-
-      // Handle positive() which adds a min check of 0 (exclusive)
-      const hasPositive = checks.some(
-        (check: any) => check.kind === 'min' && check.value === 0 && check.inclusive === false
-      );
-      if (hasPositive) {
-        jsonSchema.minimum = 1;
-      }
-    }
-
-    // Handle string constraints
-    if (currentSchema instanceof z.ZodString) {
-      const checks = (currentSchema as any)._def.checks || [];
-      checks.forEach((check: any) => {
-        switch (check.kind) {
-          case 'min':
-            jsonSchema.minLength = check.value;
-            break;
-          case 'max':
-            jsonSchema.maxLength = check.value;
-            break;
-          case 'regex':
-            jsonSchema.pattern = check.regex.source;
-            break;
-          case 'email':
-            jsonSchema.format = 'email';
-            break;
-          case 'url':
-            jsonSchema.format = 'uri';
-            break;
-          case 'uuid':
-            jsonSchema.format = 'uuid';
-            break;
-        }
-      });
-    }
-
-    return { jsonSchema, isOptional };
-  }
-
-  private getJsonSchemaTypeFromZod(zodType: z.ZodType<any>): string {
-    if (zodType instanceof z.ZodString) return 'string';
-    if (zodType instanceof z.ZodNumber) return 'number';
-    if (zodType instanceof z.ZodBoolean) return 'boolean';
-    if (zodType instanceof z.ZodArray) return 'array';
-    if (zodType instanceof z.ZodObject) return 'object';
-    if (zodType instanceof z.ZodEnum) return 'string';
-    if (zodType instanceof z.ZodNull) return 'null';
-    if (zodType instanceof z.ZodUndefined) return 'undefined';
-    if (zodType instanceof z.ZodLiteral) {
-      const value = zodType._def.value;
-      return typeof value === 'string'
-        ? 'string'
-        : typeof value === 'number'
-          ? 'number'
-          : typeof value === 'boolean'
-            ? 'boolean'
-            : 'string';
-    }
-    return 'string';
-  }
-
-  private generateSchemaFromLegacyFormat(schema: ToolInputSchema<TInput>): {
-    type: 'object';
-    properties: Record<string, unknown>;
-    required: string[];
-  } {
-    const properties: Record<string, unknown> = {};
+  private generateSchemaFromLegacyFormat(schema: ToolSchema<TInput>): ToolProtocol['toolDefinition']['inputSchema'] {
+    const properties: InputSchemaProperties = {};
     const required: string[] = [];
 
     Object.entries(schema).forEach(([key, fieldSchema]) => {
       // Determine the correct JSON schema type (unwrapping optional if necessary)
-      if(this.isZodObjectType(fieldSchema.type)) {
-        const { jsonSchema, isOptional } = this.extractFieldInfo(fieldSchema.type);
-        properties[key] = { ...fieldSchema, ...jsonSchema };
-        if (!isOptional) fieldSchema.required = true;
+      if(this.isZodType(fieldSchema.type)) {
+        const parsedSchema = (zodToJsonSchema(fieldSchema.type) as any).anyOf[1];
+        fieldSchema.required = fieldSchema.type.isOptional() ? false : true;
+        properties[key] = { ...fieldSchema, ...parsedSchema };
       }
+      // If the field is not an object, use the default JSON schema type
       else {
         const jsonType = this.getJsonSchemaType(fieldSchema.type);
         properties[key] = {
@@ -377,13 +199,8 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
       }
 
       // If the field is required, add it to the required array.
-      if (fieldSchema.required) {
-        required.push(key);
-      }
-      // If the field is not an optional, add it to the required array.
-      else if (this.isZodObjectType(fieldSchema.type) && !(fieldSchema.type instanceof z.ZodOptional)) {
-        required.push(key);
-      }
+      if (fieldSchema.required) required.push(key);
+      
     });
 
     return {
@@ -421,10 +238,10 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
 
   private async validateInput(args: Record<string, unknown>): Promise<SafeParseReturnType<TInput, unknown>> {
     
-    const zodSchema = this.isZodObjectSchema(this.schema) ? this.schema : z.object(
+    const zodSchema = this.isZodObject(this.schema) ? this.schema : z.object(
       Object.fromEntries(
-        Object.entries(this.schema as ToolInputSchema<TInput>).map(([key, schema]) => {
-          if (this.isZodObjectType(schema.type)) return [key, schema.type];
+        Object.entries(this.schema as ToolSchema<TInput>).map(([key, schema]) => {
+          if (this.isZodType(schema.type)) return [key, schema.type];
           else {
 
             let schemaZod = eval(jsonSchemaToZod(schema)) as unknown as z.ZodType<any>;
