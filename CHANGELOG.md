@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.10](https://github.com/endropie/mcp-setup/compare/v0.0.9...v0.0.10) (2025-08-14)
+
+
+### Bug Fixes
+
+* input validation tool ([a354ec8](https://github.com/endropie/mcp-setup/commit/a354ec8ce0d40b5538ec3b43f36efa35bc4f4c50))
+
 ## [0.0.9](https://github.com/endropie/mcp-setup/compare/v0.0.8...v0.0.9) (2025-08-14)
 
 
