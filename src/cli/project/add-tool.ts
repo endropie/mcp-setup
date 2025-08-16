@@ -61,7 +61,7 @@ class ${className}Tool extends MCPTool<${className}Input> {
   async execute(input: ${className}Input) {
     return {
       type: "text",
-      content: \`Processed message: \${input.message}\`,
+      text: \`Processed message: \${input.message}\`,
     };
   }
 }
