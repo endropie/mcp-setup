@@ -47,7 +47,29 @@ export type ErrorContent = {
   text: string;
 };
 
-export type ToolContent = TextContent | ErrorContent | ImageContent;
+export type AudioContent = {
+  type: 'audio';
+  data: string;
+  mimeType: string;
+};
+
+export type ResourceLinkContent = {
+  type: 'resource_link';
+  uri: string;
+  name: string;
+  description: string;
+  mimeType: string;
+};
+
+export type EmbeddingResourceContent = {
+  type: 'resource';
+  uri: string;
+  name: string;
+  description: string;
+  mimeType: string;
+}
+
+export type ToolContent = TextContent | ImageContent | AudioContent | ResourceLinkContent | EmbeddingResourceContent | ErrorContent;
 
 export type ToolResponse = {
   content: ToolContent[];
@@ -273,17 +295,12 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
   }
 
   protected createSuccessResponse(data: unknown): ToolResponse {
-    if (this.isImageContent(data)) {
-      return {
-        content: [data],
-      };
-    }
 
     if (Array.isArray(data)) {
-      const validContent = data.filter((item) => this.isValidContent(item)) as ToolContent[];
-      if (validContent.length > 0) {
+      const content = data.filter((item) => this.isValidContent(item)) as ToolContent[];
+      if (content.length > 0) {
         return {
-          content: validContent,
+          content,
         };
       }
     }
@@ -311,6 +328,46 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
     };
   }
 
+  /**
+   * Check if the content is text
+   * 
+   * @param data - The content to check
+   * 
+   * @example 
+   * {
+        "type": "text",
+        "text": "Hello, world!"
+      }
+   *  
+   * @returns True if the content is text, false otherwise
+   *  
+   */
+  private isTextContent(data: unknown): data is TextContent {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      'type' in data &&
+      data.type === 'text' &&
+      'text' in data &&
+      typeof (data as TextContent).text === 'string'
+    );
+  }
+
+  /**
+   * Check if the content is an image
+   * 
+   * @param data - The content to check
+   * 
+   * @example 
+   * {
+        "type": "image",
+        "data": "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+        "mimeType": "image/png"
+      }
+   *  
+   * @returns True if the content is an image, false otherwise
+   *  
+   */
   private isImageContent(data: unknown): data is ImageContent {
     return (
       typeof data === 'object' &&
@@ -324,14 +381,91 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
     );
   }
 
-  private isTextContent(data: unknown): data is TextContent {
+  /**
+   * Check if the content is audio
+   * 
+   * @param data - The content to check
+   * 
+   * @example 
+   * {
+        "type": "audio",
+        "data": "base64-encoded-audio-data",
+        "mimeType": "audio/mpeg"
+      }
+   *  
+   * @returns True if the content is audio, false otherwise
+   *  
+   */
+  private isAudioContent(data: unknown): data is AudioContent {
     return (
       typeof data === 'object' &&
       data !== null &&
       'type' in data &&
-      data.type === 'text' &&
-      'text' in data &&
-      typeof (data as TextContent).text === 'string'
+      data.type === 'audio' &&
+      'data' in data &&
+      'mimeType' in data &&
+      typeof (data as AudioContent).data === 'string' &&
+      typeof (data as AudioContent).mimeType === 'string'
+    );
+  }
+
+  /**
+   * Check if the content is a resource link
+   * 
+   * @param data - The content to check
+   * 
+   * @example 
+   * {
+        "type": "resource_link",
+        "uri": "file:///project/src/main.rs",
+        "name": "main.rs",
+        "description": "Primary application entry point",
+        "mimeType": "text/x-rust",
+        "annotations": {
+          "audience": ["assistant"],
+          "priority": 0.9
+        }
+      }
+   * 
+   * @returns True if the content is a resource link, false otherwise
+   */
+
+  private isResourceLinkContent(data: unknown): data is ResourceLinkContent {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      'type' in data &&
+      data.type === 'resourceLink' &&
+      'uri' in data &&
+      typeof (data as ResourceLinkContent).uri === 'string'
+    );
+  }
+
+  /**
+   * Check if the content is an array of valid content
+   * 
+   * @param data - The content to check
+   * 
+   * @example 
+   * {
+        "type": "resource",
+        "resource": {
+          "uri": "file:///project/src/main.rs",
+          "title": "Project Rust Main File",
+          "mimeType": "text/x-rust",
+          "text": "fn main() {\n    println!(\"Hello world!\");\n}",
+        }
+      }
+
+   * @returns true if the content is an array of valid content
+   */
+  private isResourceContent(data: unknown): data is EmbeddingResourceContent {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      'content' in data &&
+      Array.isArray((data as ToolResponse).content) &&
+      (data as ToolResponse).content.every((item) => this.isValidContent(item))
     );
   }
 
@@ -347,7 +481,13 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
   }
 
   private isValidContent(data: unknown): data is ToolContent {
-    return this.isImageContent(data) || this.isTextContent(data) || this.isErrorContent(data);
+
+    return this.isImageContent(data) 
+      || this.isTextContent(data) 
+      || this.isAudioContent(data) 
+      || this.isResourceLinkContent(data)
+      || this.isResourceContent(data)
+      || this.isErrorContent(data);
   }
 
   protected async fetch<T>(url: string, init?: RequestInit): Promise<T> {
