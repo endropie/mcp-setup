@@ -17,15 +17,17 @@ program
   .command('create')
   .description('Create a new MCP server project')
   .argument('[name]', 'project name')
-  .argument('[useHttp]', 'use HTTP transport configuration')
   .option('--http', 'use HTTP transport configuration')
-  .option('--port <number>', 'specify HTTP port (only valid with --http)', (val) =>
+  .option('--http-port <number>', 'specify HTTP port (only valid with --http)', (val) =>
+    parseInt(val, 10)
+  )
+  .option('--sse', 'use SSE transport configuration')
+  .option('--sse-port <number>', 'specify SSE port (only valid with --sse)', (val) =>
     parseInt(val, 10)
   )
   .option('--cors', 'enable CORS with wildcard (*) access')
-  .option('--sse', 'use SSE transport configuration', false)
-  .option('--no-install', 'skip npm install and build steps')
-  .option('--no-example', 'skip creating example tool')
+  .option('--install', 'skip npm install and build steps')
+  .option('--example', 'skip creating example tool')
   .action(createServer);
 
 

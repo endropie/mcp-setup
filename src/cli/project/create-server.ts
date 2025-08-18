@@ -7,14 +7,7 @@ import { execa } from 'execa';
 
 export async function createServer(
   name?: string,
-  http?: boolean,
-  httpPort?: number,
-  sse?: boolean,
-  ssePort?: number,
-  cors?: boolean,
-  install?: boolean,
-  example?: boolean,
-  options?: {  }
+  options?: { http: boolean, httpPort: number, sse: boolean, ssePort: number, cors: boolean, install: boolean, example: boolean }
 ) {
   let projectName: string;
 
@@ -44,7 +37,8 @@ export async function createServer(
   if (!projectName) throw new Error('Project name is required');
 
   // ask for http
-  if (typeof http !== 'boolean') {
+  let http = options?.http;
+  if (!http) {
     const response = await prompts([
       {
         type: 'confirm',
@@ -60,7 +54,8 @@ export async function createServer(
   if (typeof http !== 'boolean') throw new Error('use HTTP Transport is required');
   
   // ask for http port
-  if (http === true) {
+  let httpPort = options?.httpPort;
+  if (http === true && !httpPort) {
     const response = await prompts([
       {
         type: 'number',
@@ -74,13 +69,14 @@ export async function createServer(
   }
 
   // ask for sse
-  if (typeof sse !== 'boolean') {
+  let sse = options?.sse;
+  if (!sse) {
     const response = await prompts([
       {
         type: 'confirm',
         name: 'sse',
         message: 'Do you want to use SSE for the transport?',
-        initial: true,
+        initial: false,
       },
     ])
 
@@ -90,7 +86,8 @@ export async function createServer(
   if (typeof sse !== 'boolean') throw new Error('use SSE Transport is required');
   
   // ask for sse port
-  if (sse === true) {
+  let ssePort = options?.ssePort;
+  if (sse === true && !ssePort) {
     const response = await prompts([
       {
         type: 'number',
@@ -104,7 +101,8 @@ export async function createServer(
   }
 
   // ask for cors
-  if (typeof http === 'boolean' && typeof sse === 'boolean' &&  typeof cors !== 'boolean') {
+  let cors = options?.cors;
+  if ((http || sse) &&  !cors ) {
     const response = await prompts([
       {
         type: 'confirm',
@@ -117,7 +115,8 @@ export async function createServer(
     cors = response.cors;
   }
 
-  if (typeof install !== 'boolean') {
+  let install = options?.install;
+  if (!install) {
     const response = await prompts([
       {
         type: 'confirm',
@@ -130,7 +129,8 @@ export async function createServer(
     install = response.install;
   }
 
-  if (typeof example !== 'boolean') {
+  let example = options?.example;
+  if (!example) {
     const response = await prompts([
       {
         type: 'confirm',
@@ -143,7 +143,6 @@ export async function createServer(
     example = response.example;
   }
 
-  
 
   // Default install and example to true if not specified
   const shouldInstall = install;
