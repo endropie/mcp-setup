@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.13](https://github.com/endropie/mcp-setup/compare/v0.0.12...v0.0.13) (2025-08-18)
+
+
+### Bug Fixes
+
+* create server parameter ([4ef21fa](https://github.com/endropie/mcp-setup/commit/4ef21fafd805dae38e867b975872856b5670edda))
+
 ## [0.0.12](https://github.com/endropie/mcp-setup/compare/v0.0.11...v0.0.12) (2025-08-18)
 
 
