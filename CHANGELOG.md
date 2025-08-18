@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.11](https://github.com/endropie/mcp-setup/compare/v0.0.10...v0.0.11) (2025-08-18)
+
+
+### Features
+
+* add validate audio/resource/resource_link content ([d2634b5](https://github.com/endropie/mcp-setup/commit/d2634b545d6e8ab80c1c55dadb56930bd4728aac))
+
+
+### Bug Fixes
+
+* bug generate add tool ([a9d674e](https://github.com/endropie/mcp-setup/commit/a9d674ed83cfc27d54630ba71c818b34d83008ee))
+* generate valid tool content ([6b9e882](https://github.com/endropie/mcp-setup/commit/6b9e882f0aa0cd71b47bb3eb6e21b7cf4b51d5ac))
+* input validation schema ([3a49f93](https://github.com/endropie/mcp-setup/commit/3a49f934125ad4ed36aa132a05969bef68541a1b))
+* mcp-server cli creating ([c452b17](https://github.com/endropie/mcp-setup/commit/c452b176705e22952df4d71f9bf2486fe0a85d3b))
+
 ## [0.0.10](https://github.com/endropie/mcp-setup/compare/v0.0.9...v0.0.10) (2025-08-14)
 
 
