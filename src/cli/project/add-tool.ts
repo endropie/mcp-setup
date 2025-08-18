@@ -22,7 +22,7 @@ export async function addTool(name?: string) {
     ]);
 
     if (!response.name) {
-      console.log("Tool creation cancelled");
+      console.warn("Tool creation cancelled");
       process.exit(1);
     }
 
@@ -70,7 +70,7 @@ export default ${className}Tool;`;
 
     await writeFile(join(toolsDir, fileName), toolContent);
 
-    console.log(
+    console.info(
       `Tool ${toolName} created successfully at src/tools/${fileName}`
     );
   } catch (error) {

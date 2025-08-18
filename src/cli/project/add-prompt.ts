@@ -22,7 +22,7 @@ export async function addPrompt(name?: string) {
     ]);
 
     if (!response.name) {
-      console.log("Prompt creation cancelled");
+      console.warn("Prompt creation cancelled");
       process.exit(1);
     }
 
@@ -76,7 +76,7 @@ export default ${className}Prompt;`;
 
     await writeFile(join(promptsDir, fileName), promptContent);
 
-    console.log(
+    console.info(
       `Prompt ${promptName} created successfully at src/prompts/${fileName}`
     );
   } catch (error) {

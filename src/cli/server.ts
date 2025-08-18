@@ -17,6 +17,7 @@ program
   .command('create')
   .description('Create a new MCP server project')
   .argument('[name]', 'project name')
+  .argument('[useHttp]', 'use HTTP transport configuration')
   .option('--http', 'use HTTP transport configuration')
   .option('--port <number>', 'specify HTTP port (only valid with --http)', (val) =>
     parseInt(val, 10)

@@ -22,7 +22,7 @@ export async function addResource(name?: string) {
     ]);
 
     if (!response.name) {
-      console.log("Resource creation cancelled");
+      console.warn("Resource creation cancelled");
       process.exit(1);
     }
 
@@ -63,7 +63,7 @@ export default ${className}Resource;`;
 
     await writeFile(join(resourcesDir, fileName), resourceContent);
 
-    console.log(
+    console.info(
       `Resource ${resourceName} created successfully at src/resources/${fileName}`
     );
   } catch (error) {

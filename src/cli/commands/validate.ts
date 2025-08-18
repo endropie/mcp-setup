@@ -6,7 +6,7 @@ import { pathToFileURL } from 'url';
 export const validateCommand = new Command('validate')
   .description('Validate all tools in the current project')
   .action(async () => {
-    console.log('🔍 Validating tools...\n');
+    console.info('🔍 Validating tools...\n');
 
     const distPath = join(process.cwd(), 'dist', 'tools');
 
@@ -33,7 +33,7 @@ export const validateCommand = new Command('validate')
             try {
               instance.validate();
               validatedCount++;
-              console.log(`✅ ${file}: Valid`);
+              console.info(`✅ ${file}: Valid`);
             } catch (error: any) {
               errors.push(`❌ ${file}: ${error.message}`);
             }
@@ -44,14 +44,12 @@ export const validateCommand = new Command('validate')
       }
     }
 
-    console.log('');
-
     if (errors.length > 0) {
       console.error('Validation failed:\n');
       errors.forEach((error) => console.error(error));
       console.error(`\n❌ ${errors.length} error(s) found`);
       process.exit(1);
     } else {
-      console.log(`✅ All ${validatedCount} tools validated successfully!`);
+      console.info(`✅ All ${validatedCount} tools validated successfully!`);
     }
   });

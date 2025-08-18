@@ -103,7 +103,7 @@ export const DEFAULT_SESSION_CONFIG: SessionConfig = {
 };
 
 export const DEFAULT_HTTP_CONFIG: HttpTransportConfig = {
-  port: 3100,
+  port: 3001,
   endpoint: '/mcp',
   responseMode: 'stream',
   batchTimeout: 30000,

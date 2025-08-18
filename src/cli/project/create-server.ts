@@ -7,12 +7,16 @@ import { execa } from 'execa';
 
 export async function createServer(
   name?: string,
-  options?: { http?: boolean; port?: number; cors?: boolean; sse?: boolean; install?: boolean; example?: boolean }
+  http?: boolean,
+  httpPort?: number,
+  sse?: boolean,
+  ssePort?: number,
+  cors?: boolean,
+  install?: boolean,
+  example?: boolean,
+  options?: {  }
 ) {
   let projectName: string;
-  // Default install and example to true if not specified
-  const shouldInstall = options?.install !== false;
-  const shouldCreateExample = options?.example !== false;
 
   if (!name) {
     const response = await prompts([
@@ -28,7 +32,7 @@ export async function createServer(
     ]);
 
     if (!response.projectName) {
-      console.log('Project creation cancelled');
+      console.warn('Project creation cancelled');
       process.exit(1);
     }
 
@@ -37,16 +41,120 @@ export async function createServer(
     projectName = name;
   }
 
-  if (!projectName) {
-    throw new Error('Project name is required');
+  if (!projectName) throw new Error('Project name is required');
+
+  // ask for http
+  if (typeof http !== 'boolean') {
+    const response = await prompts([
+      {
+        type: 'confirm',
+        name: 'http',
+        message: 'Do you want to use HTTP for the transport?',
+        initial: true,
+      },
+    ])
+
+    http = response.http;
   }
+
+  if (typeof http !== 'boolean') throw new Error('use HTTP Transport is required');
+  
+  // ask for http port
+  if (http === true) {
+    const response = await prompts([
+      {
+        type: 'number',
+        name: 'httpPort',
+        message: 'Who port for the HTTP transport?',          
+        initial: 3001,
+      },
+    ])
+
+    httpPort = response.httpPort;
+  }
+
+  // ask for sse
+  if (typeof sse !== 'boolean') {
+    const response = await prompts([
+      {
+        type: 'confirm',
+        name: 'sse',
+        message: 'Do you want to use SSE for the transport?',
+        initial: true,
+      },
+    ])
+
+    sse = response.sse;
+  }
+  
+  if (typeof sse !== 'boolean') throw new Error('use SSE Transport is required');
+  
+  // ask for sse port
+  if (sse === true) {
+    const response = await prompts([
+      {
+        type: 'number',
+        name: 'ssePort',
+        message: 'Who port for the SSE transport?',          
+        initial: 3401,
+      },
+    ])
+
+    ssePort = response.ssePort;
+  }
+
+  // ask for cors
+  if (typeof http === 'boolean' && typeof sse === 'boolean' &&  typeof cors !== 'boolean') {
+    const response = await prompts([
+      {
+        type: 'confirm',
+        name: 'cors',
+        message: 'Do you want to enable CORS?',
+        initial: true,
+      },
+    ])
+
+    cors = response.cors;
+  }
+
+  if (typeof install !== 'boolean') {
+    const response = await prompts([
+      {
+        type: 'confirm',
+        name: 'install',
+        message: 'Do you want to install the project?',
+        initial: true,
+      },
+    ])
+
+    install = response.install;
+  }
+
+  if (typeof example !== 'boolean') {
+    const response = await prompts([
+      {
+        type: 'confirm',
+        name: 'example',
+        message: 'Do you want to create an example tool?',
+        initial: true,
+      },
+    ])
+
+    example = response.example;
+  }
+
+  
+
+  // Default install and example to true if not specified
+  const shouldInstall = install;
+  const shouldCreateExample = example;
 
   const projectDir = join(process.cwd(), projectName);
   const srcDir = join(projectDir, 'src');
   const toolsDir = join(srcDir, 'tools');
 
   try {
-    console.log('Creating project structure...');
+    console.info('Creating project structure...');
     await mkdir(projectDir);
     await mkdir(srcDir);
     await mkdir(toolsDir);
@@ -61,9 +169,14 @@ export async function createServer(
       },
       files: ['dist'],
       scripts: {
-        build: 'tsc && mcp-build',
-        watch: 'tsc --watch',
-        start: 'node dist/index.js',
+        'build': 'tsc && mcp-build',
+        'watch': 'tsc --watch',
+        'start:http': 'node dist/index.js --transport http',
+        'start:sse': 'node dist/index.js --transport sse',
+        'start': 'node dist/index.js',
+        'dev:http': 'tsc --watch && mcp-build && node dist/index.js',
+        'dev:sse': 'tsc --watch && mcp-build && node dist/index.js',
+        'dev': 'tsc --watch && mcp-build && node dist/index.js'
       },
       dependencies: {
         'mcp-setup': 'latest',
@@ -103,19 +216,19 @@ logs
 `;
     let indexTs = '';
     let transportConfig = '';
-    if (options?.sse || options?.http) {
+    if (sse || http) {
       transportConfig = `
   transport: {`;
 
-      if (options?.http) {
-        const port = options.port || 3100;
+      if (http) {
+        const port = httpPort || 3001;
 
         transportConfig += `
     http: {
       options: {
         port: ${port}`;
 
-          if (options.cors) {
+          if (cors) {
             transportConfig += `,
         cors: {
           allowOrigin: "*"
@@ -127,14 +240,14 @@ logs
       
       }
       
-      if (options?.sse) {
-        const port = options.port || 3100;
-        transportConfig += `
+      if (sse) {
+        const port = ssePort || 3401;
+        transportConfig += `,
     sse: {
       options: {
         port: ${port}`;
 
-          if (options.cors) {
+          if (cors) {
             transportConfig += `,
         cors: {
           allowOrigin: "*"
@@ -144,18 +257,16 @@ logs
       }
     }`;
       }
-
-
-
       transportConfig += `
-    }`;
+  }`;
     }
 
     if (transportConfig) {
 
       indexTs = `import { MCPServer } from "mcp-setup";
 
-const server = new MCPServer({${transportConfig}});
+const server = new MCPServer({${transportConfig}
+});
 
 server.start();`;
     } else {
@@ -167,10 +278,13 @@ server.start();`;
     }
 
     const exampleToolTs = `import { MCPTool } from "mcp-setup";
-// import { z } from "zod";
+import { z } from "zod";
 
 interface ExampleInput {
   message: string;
+  optionalString?: string;
+  optionalNumber?: number;
+  optionalBoolean?: boolean;
 }
 
 class ExampleTool extends MCPTool<ExampleInput> {
@@ -179,14 +293,27 @@ class ExampleTool extends MCPTool<ExampleInput> {
 
   schema = {
     message: {
-      // type: z.string(),
-      type: "string",
+      type: 'string',
       description: "Message to process",
+      required: true,
     },
+    optionalString: {
+      type: 'string',
+      description: "An optional field"
+    },
+    optionalNumber: {
+      type: 'number',
+      description: "An optional number field"
+    },
+    optionalBoolean: {
+      type: 'boolean',
+      description: "An optional boolean field"
+    }
   };
 
   async execute(input: ExampleInput) {
-    return \`Processed: \${input.message}\`;
+
+    return \`Processed: \${input.message} [string: \${input.optionalString || "-"}] [number: \${input.optionalNumber || "-"}] [boolean: \${input.optionalBoolean || "-"}] \`;
   }
 }
 
@@ -204,12 +331,12 @@ export default ExampleTool;`;
       filesToWrite.push(writeFile(join(toolsDir, 'ExampleTool.ts'), exampleToolTs));
     }
 
-    console.log('Creating project files...');
+    console.info('Creating project files...');
     await Promise.all(filesToWrite);
 
     process.chdir(projectDir);
 
-    console.log('Initializing git repository...');
+    console.info('Initializing git repository...');
     const gitInit = spawnSync('git', ['init'], {
       stdio: 'inherit',
       shell: true,
@@ -220,7 +347,7 @@ export default ExampleTool;`;
     }
 
     if (shouldInstall) {
-      console.log('Installing dependencies...');
+      console.info('Installing dependencies...');
       const npmInstall = spawnSync('npm', ['install'], {
         stdio: 'inherit',
         shell: true,
@@ -230,7 +357,7 @@ export default ExampleTool;`;
         throw new Error('Failed to install dependencies');
       }
 
-      console.log('Building project...');
+      console.info('Building project...');
       const tscBuild = await execa('npx', ['tsc'], {
         cwd: projectDir,
         stdio: 'inherit',
@@ -253,7 +380,7 @@ export default ExampleTool;`;
         throw new Error('Failed to run mcp-build');
       }
 
-      console.log(`
+      console.info(`
 Project ${projectName} created and built successfully!
 
 You can now:
@@ -262,7 +389,7 @@ You can now:
    mcp-server add tool <n>
     `);
     } else {
-      console.log(`
+      console.info(`
 Project ${projectName} created successfully (without dependencies)!
 
 You can now:

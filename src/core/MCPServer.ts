@@ -130,9 +130,6 @@ export class MCPServer {
     const type = (args.includes('--transport') ? args[args.indexOf('--transport') + 1] : 'stdio') as TransportType;
     const portArg = args.includes('--port') ? args[args.indexOf('--port') + 1] : undefined;
     const port = portArg !== undefined ? parseInt(portArg) : 3000;
-    
-
-    console.debug(`Transport type: ${type}`);
     logger.debug(`Creating transport: ${type}`);
 
     let transport: BaseTransport;
