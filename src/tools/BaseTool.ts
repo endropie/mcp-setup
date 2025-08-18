@@ -203,9 +203,15 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
     Object.entries(schema).forEach(([key, fieldSchema]) => {
       // Determine the correct JSON schema type (unwrapping optional if necessary)
       if(this.isZodType(fieldSchema.type)) {
-        const parsedSchema = (zodToJsonSchema(fieldSchema.type) as any).anyOf[1];
+
+        const parsedSchema = (zodToJsonSchema(fieldSchema.type) as any)?.anyOf
+          ? (zodToJsonSchema(fieldSchema.type) as any).anyOf[1]
+          : zodToJsonSchema(fieldSchema.type);
+
         fieldSchema.required = fieldSchema.type.isOptional() ? false : true;
         properties[key] = { ...fieldSchema, ...parsedSchema };
+        if (properties[key].$schema) delete properties[key].$schema;
+        if (typeof properties[key].required !== 'undefined') delete properties[key].required;
       }
       // If the field is not an object, use the default JSON schema type
       else {
@@ -218,7 +224,10 @@ export abstract class MCPTool<TInput extends Record<string, any> = any, TSchema 
       }
 
       // If the field is required, add it to the required array.
-      if (fieldSchema.required) required.push(key);
+      if (fieldSchema.required) {
+        required.push(key);
+
+      }
       
     });
 

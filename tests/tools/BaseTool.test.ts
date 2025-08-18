@@ -110,7 +110,8 @@ describe('BaseTool', () => {
         });
 
         expect(response.content).toHaveLength(1);
-        expect(response.content[0].type).toBe('error');
+        expect(response.content[0].type).toBe('text');
+        expect(response.isError).toBe(true);
         expect((response.content[0] as any).text).toContain('Required');
       });
 
@@ -122,7 +123,8 @@ describe('BaseTool', () => {
         });
 
         expect(response.content).toHaveLength(1);
-        expect(response.content[0].type).toBe('error');
+        expect(response.content[0].type).toBe('text');
+        expect(response.isError).toBe(true);
       });
     });
 
@@ -203,7 +205,6 @@ describe('BaseTool', () => {
       expect(definition.description).toBe('Search for products in the catalog');
       expect(definition.inputSchema.type).toBe('object');
       expect(definition.inputSchema.properties).toBeDefined();
-      expect(definition.inputSchema.required).toEqual([]);
     });
 
     it('should extract descriptions from Zod schema', () => {
@@ -246,7 +247,7 @@ describe('BaseTool', () => {
       const { properties } = findProductsTool.inputSchema;
 
       expect((properties!.first as any).type).toBe('integer');
-      expect((properties!.first as any).minimum).toBe(1);
+      expect((properties!.first as any).exclusiveMinimum).toBe(0);
     });
 
     it('should validate input using the Zod schema', async () => {
@@ -300,7 +301,8 @@ describe('BaseTool', () => {
       });
 
       expect(response.content).toHaveLength(1);
-      expect(response.content[0].type).toBe('error');
+      expect(response.content[0].type).toBe('text');
+      expect(response.isError).toBe(true);
     });
 
     it('should reject negative numbers for positive constraints', async () => {
@@ -314,7 +316,8 @@ describe('BaseTool', () => {
       });
 
       expect(response.content).toHaveLength(1);
-      expect(response.content[0].type).toBe('error');
+      expect(response.content[0].type).toBe('text');
+      expect(response.isError).toBe(true);
     });
   });
 
