@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.12](https://github.com/endropie/mcp-setup/compare/v0.0.11...v0.0.12) (2025-08-18)
+
+
+### Bug Fixes
+
+* base tool test ([c810177](https://github.com/endropie/mcp-setup/commit/c81017753f0067f5cdb4c84c2df5a45ef01fd480))
+
 ## [0.0.11](https://github.com/endropie/mcp-setup/compare/v0.0.10...v0.0.11) (2025-08-18)
 
 
